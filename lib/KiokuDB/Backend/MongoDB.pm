@@ -2,12 +2,13 @@ package KiokuDB::Backend::MongoDB;
 use Moose;
 
 use namespace::clean -except => 'meta';
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 with qw(
          KiokuDB::Backend
          KiokuDB::Backend::Serialize::JSPON
          KiokuDB::Backend::Role::Clear
+         KiokuDB::Backend::Role::Scan
          KiokuDB::Backend::Role::Query::Simple
 );
 
@@ -15,8 +16,7 @@ with qw(
 #    KiokuDB::Backend::Role::Scan
 #     (for some reason then all_entries doesn't always return all entries)
 
-use Carp qw(croak);
-use Data::Stream::Bulk::Util qw(bulk);
+use MongoDB::Connection; # In case we are expected to create the connection
 use Data::Stream::Bulk::Callback ();
 
 has [qw/database_name database_host database_port collection_name/] => (
@@ -56,13 +56,10 @@ sub clear {
 
 sub all_entries {
     my $self   = shift;
-    my $count = $self->collection->count({});
     my $cursor = $self->collection->query({});
     Data::Stream::Bulk::Callback->new(
         callback => sub {
             if (my $obj = $cursor->next) {
-                #warn "NAME: ", $obj->{data}->{name};
-                #pp($obj);
                 return [$self->deserialize($obj)];
             }
             return;
@@ -97,10 +94,10 @@ sub get {
         $self->get_entry($_)
     } @ids;
 }
- 
+
 sub get_entry {
     my ($self, $id) = @_;
-    my $obj = $self->collection->find_one({ _id => $id });
+    my $obj = eval { $self->collection->find_one({ _id => $id }); };
     return undef unless $obj;
     return $self->deserialize($obj);
 }
@@ -185,9 +182,8 @@ KiokuDB::Backend::MongoDB - MongoDB backend for KiokuDB
 
 =head1 DESCRIPTION
 
-This KiokuDB backend implements the C<Clear> and the C<Query::Simple>
-roles.  The C<Scan> role is implemented but disabled as it gives
-sporadic test failures.
+This KiokuDB backend implements the C<Clear>, C<Scan> and the C<Query::Simple>
+roles.
 
 =head1 AUTHOR
 

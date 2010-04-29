@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               KiokuDB-Backend-MongoDB
-version:            0.01
+version:            0.02
 abstract:           MongoDB backend for KiokuDB
 author:
     - Ask Bjørn Hansen <ask@develooper.com>
@@ -13,7 +13,7 @@ build_requires:
 requires:
     Data::Stream::Bulk:  0.07
     KiokuDB:             0.31
-    MongoDB:             0.02
+    MongoDB:             0.29
     Moose:               0
     Scope::Guard:        0
     Test::More:          0
@@ -21,7 +21,7 @@ no_index:
     directory:
         - t
         - inc
-generated_by:       ExtUtils::MakeMaker version 6.55_02
+generated_by:       ExtUtils::MakeMaker version 6.56
 meta-spec:
     url:      http://module-build.sourceforge.net/META-spec-v1.4.html
     version:  1.4
